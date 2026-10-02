@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Weather App</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            font-family: Arial, Helvetica, sans-serif;
+
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            padding: 20px;
+
+            background: linear-gradient(
+                135deg,
+                #4facfe,
+                #00f2fe
+            );
+        }
+
+        .weather-app {
+            width: 100%;
+            max-width: 450px;
+
+            padding: 30px;
+
+            background: rgba(255, 255, 255, 0.95);
+
+            border-radius: 25px;
+
+            text-align: center;
+
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+        }
+
+        .weather-app h1 {
+            color: #222;
+            margin-bottom: 25px;
+        }
+
+        /* Search */
+
+        .search-box {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .search-box input {
+            flex: 1;
+
+            padding: 14px;
+
+            border: 1px solid #ddd;
+            border-radius: 10px;
+
+            outline: none;
+
+            font-size: 15px;
+        }
+
+        .search-box input:focus {
+            border-color: #2196f3;
+        }
+
+        .search-box button {
+            padding: 14px 20px;
+
+            border: none;
+            border-radius: 10px;
+
+            background: #2196f3;
+            color: white;
+
+            font-size: 15px;
+            font-weight: bold;
+
+            cursor: pointer;
+
+            transition: 0.3s;
+        }
+
+        .search-box button:hover {
+            background: #1976d2;
+        }
+
+        .search-box button:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        /* Error */
+
+        #errorMessage {
+            min-height: 20px;
+
+            margin-bottom: 10px;
+
+            color: #e53935;
+
+            font-size: 14px;
+        }
+
+        /* Location */
+
+        .location h2 {
+            font-size: 30px;
+            color: #222;
+        }
+
+        .location p {
+            margin-top: 5px;
+            color: #777;
+        }
+
+        /* Weather */
+
+        #weatherIcon {
+            width: 110px;
+            height: 110px;
+
+            margin: 15px 0 5px;
+        }
+
+        .temperature {
+            font-size: 60px;
+            font-weight: bold;
+
+            color: #222;
+        }
+
+        .temperature .degree {
+            font-size: 30px;
+
+            vertical-align: top;
+        }
+
+        #condition {
+            margin-top: 5px;
+
+            color: #555;
+
+            font-size: 20px;
+        }
+
+        /* Details */
+
+        .weather-details {
+            display: grid;
+
+            grid-template-columns: 1fr 1fr;
+
+            gap: 12px;
+
+            margin-top: 25px;
+        }
+
+        .detail {
+            padding: 15px;
+
+            background: #f5f7fa;
+
+            border-radius: 14px;
+        }
+
+        .detail span {
+            display: block;
+
+            margin-bottom: 7px;
+
+            color: #777;
+
+            font-size: 13px;
+        }
+
+        .detail strong {
+            color: #222;
+
+            font-size: 16px;
+        }
+
+        /* Updated */
+
+        .updated {
+            margin-top: 20px;
+
+            color: #888;
+
+            font-size: 12px;
+        }
+
+        /* Mobile */
+
+        @media (max-width: 500px) {
+
+            .weather-app {
+                padding: 22px;
+            }
+
+            .search-box {
+                flex-direction: column;
+            }
+
+            .search-box button {
+                width: 100%;
+            }
+
+            .temperature {
+                font-size: 50px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="weather-app">
+
+        <h1>🌤️ Weather App</h1>
+
+        <!-- Search -->
+        <div class="search-box">
+
+            <input
+                type="text"
+                id="locationInput"
+                placeholder="Enter city name..."
+                autocomplete="off"
+            >
+
+            <button id="searchBtn">
+                Search
+            </button>
+
+        </div>
+
+        <!-- Error -->
+        <p id="errorMessage"></p>
+
+        <!-- Weather -->
+        <div class="weather-card">
+
+            <!-- Location -->
+            <div class="location">
+
+                <h2 id="city">
+                    London
+                </h2>
+
+                <p id="country">
+                    United Kingdom
+                </p>
+
+            </div>
+
+            <!-- Weather Icon -->
+            <img
+                id="weatherIcon"
+                src=""
+                alt="Weather"
+            >
+
+            <!-- Temperature -->
+            <div class="temperature">
+
+                <span id="temperature">
+                    --
+                </span>
+
+                <span class="degree">
+                    °C
+                </span>
+
+            </div>
+
+            <!-- Condition -->
+            <h3 id="condition">
+                Loading...
+            </h3>
+
+            <!-- Weather Details -->
+            <div class="weather-details">
+
+                <div class="detail">
+
+                    <span>
+                        🌡️ Feels Like
+                    </span>
+
+                    <strong id="feelsLike">
+                        -- °C
+                    </strong>
+
+                </div>
+
+                <div class="detail">
+
+                    <span>
+                        💧 Humidity
+                    </span>
+
+                    <strong id="humidity">
+                        --%
+                    </strong>
+
+                </div>
+
+                <div class="detail">
+
+                    <span>
+                        💨 Wind
+                    </span>
+
+                    <strong id="wind">
+                        -- km/h
+                    </strong>
+
+                </div>
+
+                <div class="detail">
+
+                    <span>
+                        ☀️ UV Index
+                    </span>
+
+                    <strong id="uv">
+                        --
+                    </strong>
+
+                </div>
+
+            </div>
+
+            <!-- Last Updated -->
+            <p class="updated">
+
+                Last updated:
+                <span id="updated">
+                    --
+                </span>
+
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <script>
+
+        // ========================================
+        // WEATHER API
+        // ========================================
+
+        const API_KEY =
+            "02d4a5348c744e0f89150130260210";
+
+        const API_URL =
+            "https://api.weatherapi.com/v1/current.json";
+
+
+        // ========================================
+        // GET HTML ELEMENTS
+        // ========================================
+
+        const locationInput =
+            document.getElementById("locationInput");
+
+        const searchBtn =
+            document.getElementById("searchBtn");
+
+        const errorMessage =
+            document.getElementById("errorMessage");
+
+        const city =
+            document.getElementById("city");
+
+        const country =
+            document.getElementById("country");
+
+        const weatherIcon =
+            document.getElementById("weatherIcon");
+
+        const temperature =
+            document.getElementById("temperature");
+
+        const condition =
+            document.getElementById("condition");
+
+        const feelsLike =
+            document.getElementById("feelsLike");
+
+        const humidity =
+            document.getElementById("humidity");
+
+        const wind =
+            document.getElementById("wind");
+
+        const uv =
+            document.getElementById("uv");
+
+        const updated =
+            document.getElementById("updated");
+
+
+        // ========================================
+        // GET WEATHER
+        // ========================================
+
+        async function getWeather(location) {
+
+            // Remove spaces
+            location = location.trim();
+
+
+            // Check empty input
+            if (!location) {
+
+                errorMessage.textContent =
+                    "Please enter a city name.";
+
+                return;
+            }
+
+
+            try {
+
+                // Clear old error
+                errorMessage.textContent = "";
+
+
+                // Loading
+                searchBtn.textContent =
+                    "Loading...";
+
+                searchBtn.disabled = true;
+
+
+                // Create API URL
+                const url =
+                    `${API_URL}?key=${API_KEY}&q=${encodeURIComponent(location)}&aqi=yes`;
+
+
+                // Fetch API
+                const response =
+                    await fetch(url);
+
+
+                // Convert response to JSON
+                const data =
+                    await response.json();
+
+
+                // Check API error
+                if (!response.ok) {
+
+                    throw new Error(
+                        data.error?.message ||
+                        "Unable to get weather information."
+                    );
+                }
+
+
+                // Display weather
+                displayWeather(data);
+
+
+            } catch (error) {
+
+                console.error(error);
+
+                errorMessage.textContent =
+                    error.message;
+
+
+            } finally {
+
+                searchBtn.textContent =
+                    "Search";
+
+                searchBtn.disabled =
+                    false;
+            }
+        }
+
+
+        // ========================================
+        // DISPLAY WEATHER
+        // ========================================
+
+        function displayWeather(data) {
+
+            const locationData =
+                data.location;
+
+            const current =
+                data.current;
+
+
+            // City
+            city.textContent =
+                locationData.name;
+
+
+            // Country
+            country.textContent =
+                `${locationData.region
+                    ? locationData.region + ", "
+                    : ""
+                }${locationData.country}`;
+
+
+            // Temperature
+            temperature.textContent =
+                Math.round(current.temp_c);
+
+
+            // Weather condition
+            condition.textContent =
+                current.condition.text;
+
+
+            // Weather icon
+            weatherIcon.src =
+                "https:" +
+                current.condition.icon;
+
+
+            weatherIcon.alt =
+                current.condition.text;
+
+
+            // Feels like
+            feelsLike.textContent =
+                `${Math.round(current.feelslike_c)} °C`;
+
+
+            // Humidity
+            humidity.textContent =
+                `${current.humidity}%`;
+
+
+            // Wind
+            wind.textContent =
+                `${current.wind_kph} km/h`;
+
+
+            // UV
+            uv.textContent =
+                current.uv;
+
+
+            // Last updated
+            updated.textContent =
+                current.last_updated;
+        }
+
+
+        // ========================================
+        // SEARCH BUTTON
+        // ========================================
+
+        searchBtn.addEventListener(
+            "click",
+            function () {
+
+                const location =
+                    locationInput.value;
+
+                getWeather(location);
+            }
+        );
+
+
+        // ========================================
+        // ENTER KEY
+        // ========================================
+
+        locationInput.addEventListener(
+            "keydown",
+            function (event) {
+
+                if (event.key === "Enter") {
+
+                    const location =
+                        locationInput.value;
+
+                    getWeather(location);
+                }
+            }
+        );
+
+
+        // ========================================
+        // DEFAULT CITY
+        // ========================================
+
+        getWeather("London");
+
+    </script>
+
+</body>
+</html>
